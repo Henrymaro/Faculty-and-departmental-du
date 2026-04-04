@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="navbar navbar-light bg-white border-bottom mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand h1"><i class="fas fa-user-shield text-primary"></i> Admin Dashboard</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">Logout</a>
+    </div>
+</nav>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card border-success shadow-sm h-100">
+            <div class="card-header bg-success text-white">Record Cash Payment</div>
+            <div class="card-body">
+                <form action="{{ url_for('record_cash') }}" method="POST">
+                    <div class="mb-2">
+                        <label>Student Matric No</label>
+                        <input type="text" name="matric_no" class="form-control" placeholder="e.g. CMP2201001" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>Dues Type</label>
+                        <select name="dues_type" class="form-select">
+                            <option value="Departmental Due">Departmental Due</option>
+                            <option value="Faculty Due">Faculty Due</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Amount (₦)</label>
+                        <input type="number" name="amount" class="form-control" placeholder="3000" required>
+                    </div>
+                    <button class="btn btn-outline-success w-100">Save Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Transaction Log</h5>
+                <form action="{{ url_for('admin_dashboard') }}" method="GET" class="d-flex">
+                    <input type="text" name="q" class="form-control form-control-sm me-2" placeholder="Search Matric No...">
+                    <button class="btn btn-sm btn-primary">Search</button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-light ms-1">Reset</a>
+                </form>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0" style="font-size: 0.9rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Details</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td>
+                                <strong>{{ p.student.full_name }}</strong><br>
+                                <span class="text-muted">{{ p.student.matric_no }}</span>
+                            </td>
+                            <td>
+                                {{ p.dues_type }}<br>
+                                <strong>₦{{ "{:,.2f}".format(p.amount) }}</strong>
+                            </td>
+                            <td>
+                                {% if p.status == 'success' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if p.status != 'success' %}
+                                    <a href="{{ url_for('approve_payment', payment_id=p.id) }}" class="btn btn-primary btn-sm">Approve</a>
+                                {% else %}
+                                    <a href="{{ url_for('view_receipt', payment_id=p.id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">View</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center p-3">No records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
